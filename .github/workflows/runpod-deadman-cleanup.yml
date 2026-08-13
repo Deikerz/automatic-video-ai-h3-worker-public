@@ -31,7 +31,7 @@ jobs:
         env:
           RESOURCE_PREFIX: ${{ inputs.resource_prefix }}
           CLEANUP_AFTER_MINUTES: ${{ inputs.cleanup_after_minutes }}
-          RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+          RUNPOD_API_KEY: ${{ secrets.RUNPOD_DEADMAN_API_KEY }}
         run: |
           test -n "$RUNPOD_API_KEY"
           [[ "$RESOURCE_PREFIX" =~ ^automatic-video-ai-[a-f0-9]{12}$ ]]
@@ -40,7 +40,7 @@ jobs:
           test "$CLEANUP_AFTER_MINUTES" -le 240
       - name: Wait until deadline, then delete only matching RunPod resources
         env:
-          RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+          RUNPOD_API_KEY: ${{ secrets.RUNPOD_DEADMAN_API_KEY }}
         run: >-
           python scripts/runpod_remote_cleanup.py
           --prefix "${{ inputs.resource_prefix }}"
