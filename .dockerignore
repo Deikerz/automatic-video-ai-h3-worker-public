@@ -1,0 +1,9 @@
+.git
+.github
+*.safetensors
+*.mp4
+*.wav
+*.png
+*.jpg
+__pycache__
+*.pyc

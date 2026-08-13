@@ -1,0 +1,18 @@
+{
+  "save_video": {"inputs": {"filename_prefix": "video/automatic-video-ai/h3-ref2va", "format": "auto", "codec": "auto", "video": ["create_video", 0]}, "class_type": "SaveVideo"},
+  "video_vae": {"inputs": {"vae_name": "minimax_h3_video_vae_fp16.safetensors"}, "class_type": "VAELoader"},
+  "audio_vae": {"inputs": {"vae_name": "minimax_h3_audio_vae_fp32.safetensors"}, "class_type": "VAELoader"},
+  "decode_audio": {"inputs": {"samples": ["sampler", 0], "vae": ["audio_vae", 0]}, "class_type": "VAEDecodeAudio"},
+  "decode_video": {"inputs": {"samples": ["sampler", 0], "vae": ["video_vae", 0]}, "class_type": "VAEDecode"},
+  "sampler_select": {"inputs": {"sampler_name": "res_multistep"}, "class_type": "KSamplerSelect"},
+  "scheduler": {"inputs": {"scheduler": "beta", "steps": 20, "denoise": 1.0, "model": ["model", 0]}, "class_type": "BasicScheduler"},
+  "sampler": {"inputs": {"noise": ["noise", 0], "guider": ["guider", 0], "sampler": ["sampler_select", 0], "sigmas": ["scheduler", 0], "latent_image": ["ref2va", 1]}, "class_type": "SamplerCustomAdvanced"},
+  "guider": {"inputs": {"model": ["model", 0], "conditioning": ["ref2va", 0]}, "class_type": "BasicGuider"},
+  "model": {"inputs": {"unet_name": "minimax_h3_ref2va_pruned_int8_convrot.safetensors", "weight_dtype": "default"}, "class_type": "UNETLoader"},
+  "clip": {"inputs": {"clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors", "type": "minimax", "device": "default"}, "class_type": "CLIPLoader"},
+  "noise": {"inputs": {"noise_seed": 42}, "class_type": "RandomNoise"},
+  "create_video": {"inputs": {"fps": 24.0, "bit_depth": 8, "images": ["decode_video", 0], "audio": ["decode_audio", 0]}, "class_type": "CreateVideo"},
+  "ref2va": {"inputs": {"clip": ["clip", 0], "vae": ["video_vae", 0], "audio_vae": ["audio_vae", 0], "prompt": "Use <Picture 1> as the first frame. Generate a cinematic Spanish audiovisual scene.", "width": 608, "height": 352, "length": ["length", 1]}, "class_type": "MiniMaxH3ReferenceToVideo"},
+  "length": {"inputs": {"expression": "max(5, round(a * 24)) + (5 - (max(5, round(a * 24)) % 17)) % 17", "values.a": ["duration", 0]}, "class_type": "ComfyMathExpression"},
+  "duration": {"inputs": {"value": 6.0}, "class_type": "PrimitiveFloat"}
+}
