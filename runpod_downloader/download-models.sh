@@ -53,6 +53,29 @@ download_one() {
   echo "H3_MODEL_VERIFIED $relative_path"
 }
 
+download_encoder() {
+  download_one \
+  "models/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors" \
+  "15687142551" \
+  "35a88d51044231fe332301d7a62aa81e3f2cba62febeb446e2c1e3e0ef76f2c6" \
+  "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
+}
+
+if [ "${H3_DOWNLOAD_ROLE:-all}" = "encoder" ]; then
+  download_encoder
+  encoder_ready="$volume_root/.automatic-video-ai-h3-encoder-ready"
+  mkdir -p "$encoder_ready"
+  grep 'models/text_encoders/' /opt/h3-models.sha256 > "$encoder_ready/sha256sums.txt.partial"
+  sync "$encoder_ready/sha256sums.txt.partial"
+  mv "$encoder_ready/sha256sums.txt.partial" "$encoder_ready/sha256sums.txt"
+  echo "H3_ENCODER_READY"
+  exec busybox httpd -f -p 8000 -h "$encoder_ready"
+fi
+if [ "${H3_DOWNLOAD_ROLE:-all}" != "all" ]; then
+  echo "H3_DOWNLOAD_ROLE must be all or encoder" >&2
+  exit 64
+fi
+
 download_one \
   "models/vae/minimax_h3_video_vae_fp16.safetensors" \
   "5207808496" \
@@ -68,11 +91,7 @@ download_one \
   "20958205608" \
   "f86f2f79ebd2d76eb8eeb46091e83982e6ff51d255747e7b16e92834b392b8e9" \
   "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_ref2va_pruned_fp8_scaled.safetensors"
-download_one \
-  "models/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors" \
-  "15687142551" \
-  "35a88d51044231fe332301d7a62aa81e3f2cba62febeb446e2c1e3e0ef76f2c6" \
-  "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"
+download_encoder
 
 (cd "$volume_root" && sha256sum -c /opt/h3-models.sha256)
 marker="$volume_root/.automatic-video-ai-h3-ready/sha256sums.txt"
