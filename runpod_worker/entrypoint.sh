@@ -16,7 +16,7 @@ if [ "${H3_AUTO_DOWNLOAD_MODELS:-false}" = "true" ]; then
   for spec in "${model_specs[@]}"; do
     IFS='|' read -r model url minimum_bytes <<< "${spec}"
     target="${H3_MODELS_ROOT}/${model}"
-    if [ ! -f "${target}" ]; then
+    if [ ! -f "${target}" ] || [ "$(stat -c%s "${target}")" -lt "${minimum_bytes}" ]; then
       echo "Downloading H3 model ${model}"
       wget --continue --tries=20 --timeout=60 --waitretry=10 "${url}" -O "${target}"
     fi
