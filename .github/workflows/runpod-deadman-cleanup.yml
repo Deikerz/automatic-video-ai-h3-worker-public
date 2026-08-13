@@ -1,0 +1,49 @@
+name: RunPod deadman cleanup
+
+on:
+  workflow_dispatch:
+    inputs:
+      resource_prefix:
+        description: Exact automatic-video-ai lease prefix
+        required: true
+        type: string
+      cleanup_after_minutes:
+        description: Hard cleanup deadline in minutes (1-240)
+        required: true
+        default: "120"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runpod-deadman-${{ inputs.resource_prefix }}
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 270
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate and arm remote cleanup before paid resources exist
+        shell: bash
+        env:
+          RESOURCE_PREFIX: ${{ inputs.resource_prefix }}
+          CLEANUP_AFTER_MINUTES: ${{ inputs.cleanup_after_minutes }}
+          RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+        run: |
+          test -n "$RUNPOD_API_KEY"
+          [[ "$RESOURCE_PREFIX" =~ ^automatic-video-ai-[a-f0-9]{12}$ ]]
+          [[ "$CLEANUP_AFTER_MINUTES" =~ ^[0-9]+$ ]]
+          test "$CLEANUP_AFTER_MINUTES" -ge 1
+          test "$CLEANUP_AFTER_MINUTES" -le 240
+      - name: Wait until deadline, then delete only matching RunPod resources
+        env:
+          RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+        run: >-
+          python scripts/runpod_remote_cleanup.py
+          --prefix "${{ inputs.resource_prefix }}"
+          --delay-minutes "${{ inputs.cleanup_after_minutes }}"
+          --attempts 120
+          --retry-seconds 15
