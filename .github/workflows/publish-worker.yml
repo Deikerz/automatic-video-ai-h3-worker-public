@@ -42,7 +42,7 @@ jobs:
         with:
           images: ${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=h3-ref2va-int8-nvfp4
+            type=raw,value=h3-ref2va-fp8-nvfp4
             type=sha
       - uses: docker/build-push-action@v6
         with:
