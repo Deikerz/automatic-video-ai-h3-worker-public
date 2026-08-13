@@ -58,3 +58,12 @@ def test_cleanup_is_scoped_to_exact_lease_prefix():
 def test_cleanup_rejects_broad_or_malformed_prefix(prefix):
     with pytest.raises(MODULE.CleanupError, match="exact"):
         MODULE.cleanup_until_absent(FakeClient(), prefix, attempts=1, retry_seconds=0)
+
+
+def test_remote_cleanup_uses_rest_v2_for_endpoint_inventory_and_deletion():
+    source = SCRIPT.read_text(encoding="utf-8")
+
+    assert '_list_rest("/v2/serverless")' in source
+    assert '"PATCH",' in source
+    assert '"workers": {"min": 0, "max": 0}' in source
+    assert '"DELETE", f"/v2/serverless/{encoded}"' in source

@@ -41,7 +41,7 @@ class RunPodCleanupClient:
                 raw = response.read()
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")[-1000:]
-            if exc.code == 404 and method == "DELETE":
+            if exc.code == 404 and method in {"PATCH", "DELETE"}:
                 return {}
             raise CleanupError(f"RunPod HTTP {exc.code} for {path}: {detail}") from exc
         except urllib.error.URLError as exc:
@@ -81,10 +81,8 @@ class RunPodCleanupClient:
                 return items
 
     def matching_inventory(self, prefix: str) -> dict[str, list[dict[str, Any]]]:
-        data = self._graphql("query { myself { endpoints { id name } } }")
-        endpoints = ((data.get("myself") or {}).get("endpoints") or []) if isinstance(data, dict) else []
         resources = {
-            "endpoint": [item for item in endpoints if isinstance(item, dict)],
+            "endpoint": self._list_rest("/v2/serverless"),
             "pod": self._list_rest("/v2/pods"),
             "network_volume": self._list_rest("/v2/network-volumes"),
         }
@@ -94,14 +92,13 @@ class RunPodCleanupClient:
         }
 
     def delete_endpoint(self, endpoint_id: str) -> None:
-        escaped = endpoint_id.replace('"', '\\"')
-        updated = self._graphql(
-            "mutation { saveEndpoint(input: { "
-            f'id: "{escaped}", workersMin: 0, workersMax: 0'
-            " }) { id } }"
+        encoded = urllib.parse.quote(endpoint_id, safe="")
+        self._request(
+            "PATCH",
+            f"/v2/serverless/{encoded}",
+            {"workers": {"min": 0, "max": 0}},
         )
-        if not updated.get("absent"):
-            self._graphql(f'mutation {{ deleteEndpoint(id: "{escaped}") }}')
+        self._request("DELETE", f"/v2/serverless/{encoded}")
 
     def delete_rest(self, path: str, resource_id: str) -> None:
         self._request("DELETE", f"{path}/{urllib.parse.quote(resource_id, safe='')}")
