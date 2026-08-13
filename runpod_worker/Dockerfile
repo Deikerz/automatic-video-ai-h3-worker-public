@@ -31,6 +31,7 @@ RUN python -m pip install --no-cache-dir -r /tmp/runpod-requirements.txt
 COPY runpod_worker/handler.py /workspace/handler.py
 COPY runpod_worker/comfy_runner.py /workspace/comfy_runner.py
 COPY runpod_worker/entrypoint.sh /workspace/entrypoint.sh
+COPY runpod_worker/h3-models.sha256 /workspace/h3-models.sha256
 COPY workflows/minimax-h3-ref2va-api.json /workspace/workflows/minimax-h3-ref2va-api.json
 RUN chmod +x /workspace/entrypoint.sh
 

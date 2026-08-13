@@ -16,6 +16,12 @@ if [ "${H3_AUTO_DOWNLOAD_MODELS:-false}" = "true" ]; then
   exit 64
 fi
 
+integrity_marker="$(dirname "${H3_MODELS_ROOT}")/.automatic-video-ai-h3-ready/sha256sums.txt"
+if [ ! -f "${integrity_marker}" ] || ! cmp -s /workspace/h3-models.sha256 "${integrity_marker}"; then
+  echo "Missing or mismatched H3 model integrity manifest: ${integrity_marker}" >&2
+  exit 1
+fi
+
 for spec in "${model_specs[@]}"; do
   IFS='|' read -r model expected_bytes <<< "${spec}"
   target="${H3_MODELS_ROOT}/${model}"
