@@ -76,6 +76,13 @@ if [ "${H3_DOWNLOAD_ROLE:-all}" != "all" ]; then
   exit 64
 fi
 
+download_encoder &
+encoder_pid="$!"
+cleanup_encoder() {
+  kill "$encoder_pid" 2>/dev/null || true
+}
+trap cleanup_encoder EXIT INT TERM
+
 download_one \
   "models/vae/minimax_h3_video_vae_fp16.safetensors" \
   "5207808496" \
@@ -91,7 +98,8 @@ download_one \
   "20958205608" \
   "f86f2f79ebd2d76eb8eeb46091e83982e6ff51d255747e7b16e92834b392b8e9" \
   "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_ref2va_pruned_fp8_scaled.safetensors"
-download_encoder
+wait "$encoder_pid"
+trap - EXIT INT TERM
 
 (cd "$volume_root" && sha256sum -c /opt/h3-models.sha256)
 marker="$volume_root/.automatic-video-ai-h3-ready/sha256sums.txt"
