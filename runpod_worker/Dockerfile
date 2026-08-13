@@ -4,10 +4,14 @@ FROM runpod/worker-comfyui:5.8.6-base
 # immutable official ComfyUI release that contains the Ref2VA node instead of
 # tracking master or relying on a mutable base-image installation.
 ARG COMFYUI_COMMIT=c2bcbecd82ec5ae66594340b395c24ef0217b238
+ARG PYTORCH_CUDA_INDEX=https://download.pytorch.org/whl/cu126
 
 RUN git -C /comfyui fetch --depth 1 origin "${COMFYUI_COMMIT}" \
     && git -C /comfyui checkout --detach "${COMFYUI_COMMIT}" \
     && python -m pip install --no-cache-dir -r /comfyui/requirements.txt \
+    && python -m pip install --no-cache-dir --force-reinstall \
+        torch==2.12.0 torchvision==0.27.0 --index-url "${PYTORCH_CUDA_INDEX}" \
+    && python -c "import torch, torchvision; assert torch.__version__.startswith('2.12.0+cu126'); assert torch.version.cuda == '12.6'; print('Pinned PyTorch', torch.__version__, 'CUDA', torch.version.cuda, 'torchvision', torchvision.__version__)" \
     && test -f /comfyui/comfy_extras/nodes_minimax_h3.py \
     && grep -q 'class MiniMaxH3ReferenceToVideo' /comfyui/comfy_extras/nodes_minimax_h3.py \
     && cd /comfyui \
