@@ -10,8 +10,8 @@ RUN git -C /comfyui fetch --depth 1 origin "${COMFYUI_COMMIT}" \
     && git -C /comfyui checkout --detach "${COMFYUI_COMMIT}" \
     && python -m pip install --no-cache-dir -r /comfyui/requirements.txt \
     && python -m pip install --no-cache-dir --force-reinstall \
-        torch==2.12.0 torchvision==0.27.0 --index-url "${PYTORCH_CUDA_INDEX}" \
-    && python -c "import torch, torchvision; assert torch.__version__.startswith('2.12.0+cu126'); assert torch.version.cuda == '12.6'; print('Pinned PyTorch', torch.__version__, 'CUDA', torch.version.cuda, 'torchvision', torchvision.__version__)" \
+        torch==2.12.0 torchvision==0.27.0 torchaudio==2.11.0 --index-url "${PYTORCH_CUDA_INDEX}" \
+    && python -c "import torch, torchvision, torchaudio; assert torch.__version__.startswith('2.12.0+cu126'); assert torch.version.cuda == '12.6'; assert torchaudio.__version__.endswith('+cu126'); print('Pinned PyTorch', torch.__version__, 'CUDA', torch.version.cuda, 'torchvision', torchvision.__version__, 'torchaudio', torchaudio.__version__)" \
     && test -f /comfyui/comfy_extras/nodes_minimax_h3.py \
     && grep -q 'class MiniMaxH3ReferenceToVideo' /comfyui/comfy_extras/nodes_minimax_h3.py \
     && cd /comfyui \
