@@ -31,10 +31,4 @@ for folder in vae diffusion_models text_encoders; do
   fi
 done
 
-python -u "${COMFYUI_ROOT}/main.py" \
-  --listen 127.0.0.1 \
-  --port "${COMFYUI_PORT}" \
-  --disable-auto-launch \
-  > /tmp/comfyui.log 2>&1 &
-
 exec python /workspace/handler.py

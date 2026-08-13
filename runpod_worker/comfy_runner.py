@@ -66,22 +66,30 @@ class ComfyRunner:
         except httpx.HTTPError:
             pass
         port = self.base_url.rsplit(":", 1)[1]
-        self.process = subprocess.Popen(
-            ["python", str(self.root / "main.py"), "--listen", "127.0.0.1", "--port", port, "--disable-auto-launch"],
-            cwd=self.root,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT,
-            text=True,
-        )
+        log_path = Path("/tmp/comfyui.log")
+        with log_path.open("w", encoding="utf-8") as log:
+            self.process = subprocess.Popen(
+                ["python", str(self.root / "main.py"), "--listen", "127.0.0.1", "--port", port, "--disable-auto-launch"],
+                cwd=self.root,
+                stdout=log,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
         deadline = time.monotonic() + 300
         while time.monotonic() < deadline:
+            if self.process.poll() is not None:
+                detail = log_path.read_text(encoding="utf-8", errors="replace")[-8000:]
+                raise RuntimeError(f"ComfyUI exited during startup:\n{detail}")
             try:
                 response = self.http.get(f"{self.base_url}/system_stats")
                 if response.is_success:
                     return
             except httpx.HTTPError:
                 time.sleep(1)
-        raise TimeoutError("ComfyUI did not become ready within 300 seconds")
+        if self.process.poll() is None:
+            self.process.terminate()
+        detail = log_path.read_text(encoding="utf-8", errors="replace")[-8000:]
+        raise TimeoutError(f"ComfyUI did not become ready within 300 seconds:\n{detail}")
 
     def upload(self, path: Path, kind: str) -> str:
         # ComfyUI's built-in uploader is /upload/image for every input asset;
