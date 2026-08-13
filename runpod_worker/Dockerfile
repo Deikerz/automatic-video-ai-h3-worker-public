@@ -5,7 +5,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     COMFYUI_ROOT=/comfyui \
     COMFYUI_PORT=8188 \
     H3_WORKFLOW_PATH=/workspace/workflows/minimax-h3-ref2va-api.json \
-    H3_MODELS_ROOT=/runpod-volume/models
+    H3_MODELS_ROOT=/runpod-volume/models \
+    H3_AUTO_DOWNLOAD_MODELS=false
 
 COPY runpod_worker/requirements.txt /tmp/runpod-requirements.txt
 RUN python -m pip install --no-cache-dir -r /tmp/runpod-requirements.txt

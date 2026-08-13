@@ -21,6 +21,8 @@ The Docker image uses the public `runpod/worker-comfyui:5.8.6-base` image and ad
 
 The four published H3 weights occupy approximately 39 GB before ComfyUI caches and generated files. Use a 50 GB volume as the absolute minimum and 64 GB for operational headroom; the existing 10 GB volume is not sufficient.
 
+Set `H3_AUTO_DOWNLOAD_MODELS=true` on the endpoint for the first deployment. The worker resumes the four official Hugging Face downloads into the persistent volume and validates their minimum sizes before starting ComfyUI. Keep the volume attached for subsequent scale-to-zero workers so downloads happen only once.
+
 ## Models
 
 Run `scripts/prepare-runpod-models.ps1` against a mounted volume or upload the four files through the RunPod S3-compatible API. Verify the model license and commercial-use terms before publishing generated videos.
