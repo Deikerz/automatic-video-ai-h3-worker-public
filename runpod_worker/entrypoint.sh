@@ -5,10 +5,10 @@ mkdir -p "${H3_MODELS_ROOT}/vae" "${H3_MODELS_ROOT}/diffusion_models" "${H3_MODE
 mkdir -p "${COMFYUI_ROOT}/models/vae" "${COMFYUI_ROOT}/models/diffusion_models" "${COMFYUI_ROOT}/models/text_encoders"
 
 model_specs=(
-  "vae/minimax_h3_video_vae_fp16.safetensors|5200000000"
-  "vae/minimax_h3_audio_vae_fp32.safetensors|600000000"
-  "diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors|20900000000"
-  "text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors|15600000000"
+  "vae/minimax_h3_video_vae_fp16.safetensors|5207808496"
+  "vae/minimax_h3_audio_vae_fp32.safetensors|605254808"
+  "diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors|20970379616"
+  "text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors|15687142551"
 )
 
 if [ "${H3_AUTO_DOWNLOAD_MODELS:-false}" = "true" ]; then
@@ -17,10 +17,10 @@ if [ "${H3_AUTO_DOWNLOAD_MODELS:-false}" = "true" ]; then
 fi
 
 for spec in "${model_specs[@]}"; do
-  IFS='|' read -r model minimum_bytes <<< "${spec}"
+  IFS='|' read -r model expected_bytes <<< "${spec}"
   target="${H3_MODELS_ROOT}/${model}"
-  if [ ! -f "${target}" ] || [ "$(stat -c%s "${target}")" -lt "${minimum_bytes}" ]; then
-    echo "Missing or incomplete required H3 model: ${target}" >&2
+  if [ ! -f "${target}" ] || [ "$(stat -c%s "${target}")" -ne "${expected_bytes}" ]; then
+    echo "Missing or size-mismatched required H3 model: ${target}; expected exactly ${expected_bytes} bytes" >&2
     exit 1
   fi
 done
