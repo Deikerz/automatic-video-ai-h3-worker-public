@@ -1,5 +1,10 @@
 FROM runpod/worker-comfyui:5.8.6-base
 
+# The base image predates MiniMax H3 support (merged 2026-08-03). Pin an
+# immutable official ComfyUI release that contains the Ref2VA node instead of
+# tracking master or relying on a mutable base-image installation.
+ARG COMFYUI_COMMIT=c2bcbecd82ec5ae66594340b395c24ef0217b238
+
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     COMFYUI_ROOT=/comfyui \
@@ -9,6 +14,14 @@ ENV DEBIAN_FRONTEND=noninteractive \
     H3_AUTO_DOWNLOAD_MODELS=false \
     HF_HUB_OFFLINE=1 \
     TRANSFORMERS_OFFLINE=1
+
+RUN git -C /comfyui fetch --depth 1 origin "${COMFYUI_COMMIT}" \
+    && git -C /comfyui checkout --detach "${COMFYUI_COMMIT}" \
+    && python -m pip install --no-cache-dir -r /comfyui/requirements.txt \
+    && test -f /comfyui/comfy_extras/nodes_minimax_h3.py \
+    && grep -q 'class MiniMaxH3ReferenceToVideo' /comfyui/comfy_extras/nodes_minimax_h3.py \
+    && cd /comfyui \
+    && timeout 300 python main.py --quick-test-for-ci --cpu
 
 COPY runpod_worker/requirements.txt /tmp/runpod-requirements.txt
 RUN python -m pip install --no-cache-dir -r /tmp/runpod-requirements.txt
