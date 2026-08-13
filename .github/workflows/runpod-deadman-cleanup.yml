@@ -1,4 +1,5 @@
 name: RunPod deadman cleanup
+run-name: RunPod deadman ${{ inputs.resource_prefix }}
 
 on:
   workflow_dispatch:

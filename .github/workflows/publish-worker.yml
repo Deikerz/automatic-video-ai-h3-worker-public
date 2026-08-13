@@ -3,7 +3,15 @@ name: Publish H3 worker
 on:
   push:
     branches: [main]
+    paths:
+      - "runpod_worker/**"
+      - "workflows/**"
+      - ".github/workflows/publish-worker.yml"
   workflow_dispatch:
+
+concurrency:
+  group: publish-h3-worker-main
+  cancel-in-progress: true
 
 permissions:
   contents: read
