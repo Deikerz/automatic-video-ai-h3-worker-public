@@ -7,7 +7,7 @@ mkdir -p "${COMFYUI_ROOT}/models/vae" "${COMFYUI_ROOT}/models/diffusion_models" 
 model_specs=(
   "vae/minimax_h3_video_vae_fp16.safetensors|5207808496"
   "vae/minimax_h3_audio_vae_fp32.safetensors|605254808"
-  "diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors|20970379616"
+  "diffusion_models/minimax_h3_ref2va_pruned_fp8_scaled.safetensors|20958205608"
   "text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors|15687142551"
 )
 

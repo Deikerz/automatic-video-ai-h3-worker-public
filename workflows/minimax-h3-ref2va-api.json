@@ -8,7 +8,7 @@
   "scheduler": {"inputs": {"scheduler": "beta", "steps": 20, "denoise": 1.0, "model": ["model", 0]}, "class_type": "BasicScheduler"},
   "sampler": {"inputs": {"noise": ["noise", 0], "guider": ["guider", 0], "sampler": ["sampler_select", 0], "sigmas": ["scheduler", 0], "latent_image": ["ref2va", 1]}, "class_type": "SamplerCustomAdvanced"},
   "guider": {"inputs": {"model": ["model", 0], "conditioning": ["ref2va", 0]}, "class_type": "BasicGuider"},
-  "model": {"inputs": {"unet_name": "minimax_h3_ref2va_pruned_int8_convrot.safetensors", "weight_dtype": "default"}, "class_type": "UNETLoader"},
+  "model": {"inputs": {"unet_name": "minimax_h3_ref2va_pruned_fp8_scaled.safetensors", "weight_dtype": "default"}, "class_type": "UNETLoader"},
   "clip": {"inputs": {"clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors", "type": "minimax", "device": "default"}, "class_type": "CLIPLoader"},
   "noise": {"inputs": {"noise_seed": 42}, "class_type": "RandomNoise"},
   "create_video": {"inputs": {"fps": 24.0, "bit_depth": 8, "images": ["decode_video", 0], "audio": ["decode_audio", 0]}, "class_type": "CreateVideo"},

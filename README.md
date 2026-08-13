@@ -11,7 +11,7 @@ and MP4 output as Base64.
 
 Published model set:
 
-- `minimax_h3_ref2va_pruned_int8_convrot.safetensors`
+- `minimax_h3_ref2va_pruned_fp8_scaled.safetensors`
 - `qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors`
 - `minimax_h3_video_vae_fp16.safetensors`
 - `minimax_h3_audio_vae_fp32.safetensors`

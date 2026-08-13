@@ -2,7 +2,7 @@
 
 This worker runs the official ComfyUI Ref2VA graph with the cost-oriented weights:
 
-- diffusion: `minimax_h3_ref2va_pruned_int8_convrot.safetensors`;
+- diffusion: `minimax_h3_ref2va_pruned_fp8_scaled.safetensors`;
 - text encoder: `qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors`;
 - video VAE: FP16;
 - audio VAE: FP32.
