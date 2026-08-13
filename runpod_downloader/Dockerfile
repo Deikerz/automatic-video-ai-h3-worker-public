@@ -1,6 +1,6 @@
 FROM alpine:3.22.1
 
-RUN apk add --no-cache ca-certificates coreutils curl
+RUN apk add --no-cache busybox-extras ca-certificates coreutils curl
 
 ENV H3_MODELS_ROOT=/runpod-volume/models \
     H3_DOWNLOAD_TIMEOUT_SECONDS=7200 \

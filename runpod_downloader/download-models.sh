@@ -69,7 +69,7 @@ if [ "${H3_DOWNLOAD_ROLE:-all}" = "encoder" ]; then
   sync "$encoder_ready/sha256sums.txt.partial"
   mv "$encoder_ready/sha256sums.txt.partial" "$encoder_ready/sha256sums.txt"
   echo "H3_ENCODER_READY"
-  exec busybox httpd -f -p 8000 -h "$encoder_ready"
+  exec httpd -f -p 8000 -h "$encoder_ready"
 fi
 if [ "${H3_DOWNLOAD_ROLE:-all}" != "all" ]; then
   echo "H3_DOWNLOAD_ROLE must be all or encoder" >&2
@@ -101,4 +101,4 @@ sync "$marker_partial"
 mv "$marker_partial" "$marker"
 echo "H3_MODELS_READY"
 
-exec busybox httpd -f -p 8000 -h "$volume_root/.automatic-video-ai-h3-ready"
+exec httpd -f -p 8000 -h "$volume_root/.automatic-video-ai-h3-ready"
