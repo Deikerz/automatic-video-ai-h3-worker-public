@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import logging
 import mimetypes
 import os
 import subprocess
@@ -99,6 +100,36 @@ class ComfyRunner:
         payload = response.json()
         return f"{payload.get('subfolder', '').strip('/')}/{payload.get('name', path.name)}".strip("/")
 
+    @staticmethod
+    def _unlink_scoped(base: Path, relative: str) -> None:
+        base = base.resolve()
+        target = (base / relative).resolve()
+        try:
+            target.relative_to(base)
+        except ValueError:
+            logging.warning("Refusing to delete a ComfyUI path outside %s: %s", base, target)
+            return
+        try:
+            target.unlink(missing_ok=True)
+        except OSError:
+            logging.warning("Could not remove temporary ComfyUI file %s", target, exc_info=True)
+
+    def cleanup_inputs(self, names: list[str]) -> None:
+        for name in names:
+            self._unlink_scoped(self.root / "input", name)
+
+    def _cleanup_output(self, info: dict[str, str]) -> None:
+        roots = {
+            "output": self.root / "output",
+            "temp": self.root / "temp",
+            "input": self.root / "input",
+        }
+        base = roots.get(info.get("type", "output"))
+        if base is None:
+            return
+        relative = str(Path(info.get("subfolder", "")) / info["filename"])
+        self._unlink_scoped(base, relative)
+
     def _graph(self) -> dict[str, Any]:
         graph = json.loads(self.workflow_path.read_text(encoding="utf-8"))
         if not isinstance(graph, dict):
@@ -162,6 +193,8 @@ class ComfyRunner:
                     raise RuntimeError("ComfyUI completed without a video output")
                 media = self.http.get(f"{self.base_url}/view", params=info)
                 media.raise_for_status()
-                return media.content
+                content = media.content
+                self._cleanup_output(info)
+                return content
             time.sleep(2)
         raise TimeoutError(f"ComfyUI prompt {prompt_id} exceeded timeout")
